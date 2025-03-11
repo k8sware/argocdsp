@@ -1,4 +1,3 @@
-
 # ArgoCD SP Operator
 
 The ArgoCD SP Operator provides a Kubernetes controller that automates the management of secrets for ArgoCD service principals. The operator leverages [Kopf](https://kopf.readthedocs.io/) for building Kubernetes operators and the [Kubernetes Python client](https://github.com/kubernetes-client/python) to interact with the cluster.
@@ -28,6 +27,7 @@ The ArgoCD SP Operator provides a Kubernetes controller that automates the manag
 ## Architecture
 
 The operator is implemented in [Python (`src/controller.py`)](src/controller.py) and uses the following libraries:
+
 - **Kopf:** For Kubernetes event handling.
 - **Kubernetes Python Client:** To interact with your Kubernetes secret API.
 - **Requests:** To retrieve an Azure AD token used for authenticating with Microsoft.
@@ -53,15 +53,15 @@ The operator is implemented in [Python (`src/controller.py`)](src/controller.py)
    Deploy the CRD, RBAC, and deployment manifests contained in the [kubernetes](kubernetes/) folder. For example:
 
    ```sh
-   kubectl apply -f kubernetes/pre-requisite.yaml
-   kubectl apply -f kubernetes/deploy.yaml
+   kubectl apply -f https://raw.githubusercontent.com/k8sware/argocdsp/refs/heads/main/kubernetes/pre-requisite.yaml
+   kubectl apply -f https://raw.githubusercontent.com/k8sware/argocdsp/refs/heads/main/kubernetes/deploy.yaml
    ```
 
 3. **Custom Resource Application**:  
    An example custom resource is provided in [example/secret.yaml](example/secret.yaml). Adjust the values as needed and apply:
 
    ```sh
-   kubectl apply -f example/secret.yaml
+   kubectl apply -f https://raw.githubusercontent.com/k8sware/argocdsp/refs/heads/main/example/secret.yaml
    ```
 
 ## Usage
