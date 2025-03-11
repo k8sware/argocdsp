@@ -30,7 +30,7 @@ spec:
       serviceAccountName: argocd-sp-controller
       containers:
         - name: argocd-sp-controller
-          image: k8sware/argocdsp:latest
+          image: k8sware/argocdsp:v0.0.1
           imagePullPolicy: Always
           livelinessProbe:
             httpGet:
