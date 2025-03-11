@@ -1,0 +1,98 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: argocd-sp-controller
+rules:
+  - apiGroups: [k8sware.com]
+    resources: [clusterkopfpeerings]
+    verbs: [list, watch, patch, get]
+
+    # Framework: runtime observation of namespaces & CRDs (addition/deletion).
+  - apiGroups: [apiextensions.k8s.io]
+    resources: [customresourcedefinitions]
+    verbs: [list, watch]
+  - apiGroups: [""]
+    resources: [namespaces]
+    verbs: [list, watch]
+
+  # Framework: admission webhook configuration management.
+  - apiGroups:
+      [admissionregistration.k8s.io/v1, admissionregistration.k8s.io/v1beta1]
+    resources: [validatingwebhookconfigurations, mutatingwebhookconfigurations]
+    verbs: [create, patch]
+
+  # Application: read-only access for watching cluster-wide.
+  - apiGroups: [k8sware.com]
+    resources: [argocdsp]
+    verbs: ["*"]
+
+  - apiGroups: [""]
+    resources: [secrets, events]
+    verbs: [list, watch, get, create, update]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: argocd-sp-controller-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: argocd-sp-controller
+subjects:
+  - kind: ServiceAccount
+    name: argocd-sp-controller
+    namespace: argocd-sp-controller
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: argocdsp.k8sware.com
+  labels:
+    createdByNamespaceAdmin: "true"
+spec:
+  group: k8sware.com
+  names:
+    kind: ArgoCDSP
+    listKind: ArgoCDSPList
+    plural: argocdsp
+    singular: argocdsp
+  scope: Namespaced
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                clientId:
+                  type: string
+                  pattern: "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"
+                clientSecretRef:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    key:
+                      type: string
+                  required:
+                    - name
+                    - key
+                tenantId:
+                  type: string
+                gitUrl:
+                  type: string
+                  pattern: "^https"
+                secretType:
+                  type: string
+                  enum: [repository, repo-creds]
+                  default: repository
+              required:
+                - clientId
+                - clientSecretRef
+                - gitUrl
